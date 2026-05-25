@@ -1,0 +1,3 @@
+[submodule "XisfPrep"]
+	path = XisfPrep
+	url = https://github.com/JonathanMaccollum/XisfPrep.git
