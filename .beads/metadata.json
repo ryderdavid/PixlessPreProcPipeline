@@ -1,0 +1,7 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "embedded",
+  "dolt_database": "PixlessPreProcPipeline",
+  "project_id": "d5756e48-68e1-413a-8d74-bece72a44940"
+}
