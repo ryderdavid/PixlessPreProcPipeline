@@ -1,0 +1,20 @@
+# Bitloops indexing exclusions (gitignore-style globs, relative to repo root).
+# Bitloops does NOT honor .gitignore, so heavy/non-source paths must be listed here.
+
+# Python virtualenv — 15k+ site-package files; large ones overflow bge-m3's
+# 8192-token limit and crash the local embeddings daemon (Invalid buffer size).
+scripts/.venv/**
+**/.venv/**
+**/venv/**
+
+# Caches and build artifacts
+**/__pycache__/**
+**/.pytest_cache/**
+**/.mypy_cache/**
+**/node_modules/**
+**/dist/**
+**/build/**
+
+# VCS / tooling internals
+**/.git/**
+**/.dolt/**

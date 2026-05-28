@@ -30,9 +30,10 @@ OBS_LON = -109.0208
 OBS_ELEV_M = 1257.0
 OBS_TIMEZONE = ZoneInfo("America/Denver")
 
+from report_paths import NIGHT_REPORT_CSV, ensure_report_dirs
+
 DEFAULT_LIGHT_ROOT = Path("/Volumes/FileStore/ASTRO/AARO/NINA/LIGHT")
-SCRIPT_DIR = Path(__file__).resolve().parent
-DEFAULT_OUTPUT = SCRIPT_DIR / "night_report.csv"
+DEFAULT_OUTPUT = NIGHT_REPORT_CSV
 
 NIGHT_SPLIT_GAP = timedelta(hours=12)
 ROOF_GAP_THRESHOLD = timedelta(minutes=30)
@@ -225,6 +226,7 @@ def metrics_to_row(m: NightMetrics) -> dict[str, str | float | int]:
 def write_csv(rows: list[dict[str, str | float | int]], output_path: Path) -> None:
     if not rows:
         return
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     fieldnames = list(rows[0].keys())
     with output_path.open("w", newline="", encoding="utf-8") as fh:
         writer = csv.DictWriter(fh, fieldnames=fieldnames)
@@ -261,6 +263,7 @@ def main() -> None:
     metrics.sort(key=lambda m: m.night_date)
 
     rows = [metrics_to_row(m) for m in metrics]
+    ensure_report_dirs()
     write_csv(rows, args.output)
 
     print(f"Parsed {len(frames)} frames across {len(metrics)} nights")

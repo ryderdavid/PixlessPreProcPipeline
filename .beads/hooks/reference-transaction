@@ -41,10 +41,5 @@ unset GIT_OBJECT_DIRECTORY
 unset GIT_ALTERNATE_OBJECT_DIRECTORIES
 unset GIT_COMMON_DIR
 unset GIT_PREFIX
-# Post-merge: refresh DevQL after pull/merge; failures must not block git
-bitloops hooks git post-merge "$@" 2>/dev/null || true
-# Chain: run pre-existing hook
-_bitloops_hook_dir="$(dirname "$0")"
-if [ -x "$_bitloops_hook_dir/post-merge.pre-bitloops" ]; then
-"$_bitloops_hook_dir/post-merge.pre-bitloops" "$@"
-fi
+# Reference-transaction: branch deletion cleanup; failures must not block git
+bitloops hooks git reference-transaction "$@" 2>/dev/null || true

@@ -1,24 +1,50 @@
-#!/usr/bin/env sh
-# --- BEGIN BEADS INTEGRATION v1.0.4 ---
-# This section is managed by beads. Do not remove these markers.
-if command -v bd >/dev/null 2>&1; then
-  export BD_GIT_HOOK=1
-  _bd_timeout=${BEADS_HOOK_TIMEOUT:-300}
-  if command -v timeout >/dev/null 2>&1; then
-    timeout "$_bd_timeout" bd hooks run post-checkout "$@"
-    _bd_exit=$?
-    if [ $_bd_exit -eq 124 ]; then
-      echo >&2 "beads: hook 'post-checkout' timed out after ${_bd_timeout}s — continuing without beads"
-      _bd_exit=0
-    fi
-  else
-    bd hooks run post-checkout "$@"
-    _bd_exit=$?
-  fi
-  if [ $_bd_exit -eq 3 ]; then
-    echo >&2 "beads: database not initialized — skipping hook 'post-checkout'"
-    _bd_exit=0
-  fi
-  if [ $_bd_exit -ne 0 ]; then exit $_bd_exit; fi
+#!/bin/sh
+# Bitloops git hooks
+# Resolve DuckDB runtime library when using dynamic (non-bundled) builds.
+_bitloops_add_lib_path() {
+_candidate="$1"
+if [ ! -d "$_candidate" ]; then
+return 1
 fi
-# --- END BEADS INTEGRATION v1.0.4 ---
+if [ -f "$_candidate/libduckdb.dylib" ]; then
+case ":${DYLD_LIBRARY_PATH:-}:" in
+*":$_candidate:"*) ;;
+*) export DYLD_LIBRARY_PATH="$_candidate${DYLD_LIBRARY_PATH:+:$DYLD_LIBRARY_PATH}" ;;
+esac
+return 0
+fi
+if [ -f "$_candidate/libduckdb.so" ]; then
+case ":${LD_LIBRARY_PATH:-}:" in
+*":$_candidate:"*) ;;
+*) export LD_LIBRARY_PATH="$_candidate${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" ;;
+esac
+return 0
+fi
+return 1
+}
+_bitloops_bin="$(command -v "bitloops" 2>/dev/null || true)"
+if [ -n "$_bitloops_bin" ]; then
+_bitloops_bin_dir="$(cd "$(dirname "$_bitloops_bin")" && pwd)"
+if ! _bitloops_add_lib_path "$_bitloops_bin_dir/deps"; then
+if ! _bitloops_add_lib_path "$_bitloops_bin_dir/../deps"; then
+for _candidate in "$_bitloops_bin_dir"/../duckdb-download/*/*; do
+_bitloops_add_lib_path "$_candidate" && break
+done
+fi
+fi
+fi
+# Clear inherited git-hook state before Bitloops runs nested git commands.
+unset GIT_DIR
+unset GIT_WORK_TREE
+unset GIT_INDEX_FILE
+unset GIT_OBJECT_DIRECTORY
+unset GIT_ALTERNATE_OBJECT_DIRECTORIES
+unset GIT_COMMON_DIR
+unset GIT_PREFIX
+# Post-checkout: branch seeding and bookkeeping; failures must not block git
+bitloops hooks git post-checkout "$@" 2>/dev/null || true
+# Chain: run pre-existing hook
+_bitloops_hook_dir="$(dirname "$0")"
+if [ -x "$_bitloops_hook_dir/post-checkout.pre-bitloops" ]; then
+"$_bitloops_hook_dir/post-checkout.pre-bitloops" "$@"
+fi

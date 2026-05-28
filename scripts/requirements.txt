@@ -1,4 +1,7 @@
 astropy>=7.0
 astroplan>=0.10
+matplotlib>=3.8
 numpy>=2.0
+pandas>=2.0
+plotnine>=0.14
 tabulate>=0.9

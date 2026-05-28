@@ -1,0 +1,66 @@
+{
+  "hooks": {
+    "afterShellExecution": [
+      {
+        "command": "bitloops hooks cursor after-shell-execution"
+      }
+    ],
+    "beforeShellExecution": [
+      {
+        "command": "bitloops hooks cursor before-shell-execution"
+      },
+      {
+        "command": ".cursor/hooks/ensure-filestore.sh",
+        "matcher": "FileStore|/Volumes/FileStore|night_analysis|run_night_reports|ASTRO/AARO/NINA",
+        "timeout": 45
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "bitloops hooks cursor before-submit-prompt"
+      }
+    ],
+    "preCompact": [
+      {
+        "command": "bitloops hooks cursor pre-compact"
+      }
+    ],
+    "preToolUse": [
+      {
+        "command": ".cursor/hooks/ensure-filestore.sh",
+        "matcher": "Read|Grep|Glob|Shell",
+        "timeout": 45
+      }
+    ],
+    "sessionEnd": [
+      {
+        "command": "bitloops hooks cursor session-end"
+      }
+    ],
+    "sessionStart": [
+      {
+        "command": "bitloops hooks cursor session-start"
+      },
+      {
+        "command": ".cursor/hooks/ensure-filestore.sh",
+        "timeout": 45
+      }
+    ],
+    "stop": [
+      {
+        "command": "bitloops hooks cursor stop"
+      }
+    ],
+    "subagentStart": [
+      {
+        "command": "bitloops hooks cursor subagent-start"
+      }
+    ],
+    "subagentStop": [
+      {
+        "command": "bitloops hooks cursor subagent-stop"
+      }
+    ]
+  },
+  "version": 1
+}
